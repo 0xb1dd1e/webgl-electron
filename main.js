@@ -60,8 +60,11 @@ function hookPowerMonitorEvents() {
   electron.powerMonitor.on('shutdown', (e) =>  {
     console.log('The system is going to shutdown');
   });
-    
 }
+
+app.on('gpu-process-crashed', () => {
+  console.log('GPU process crashed! Need to restart?');
+});
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
