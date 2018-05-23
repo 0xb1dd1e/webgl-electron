@@ -64,6 +64,7 @@ function hookPowerMonitorEvents() {
 
 app.on('gpu-process-crashed', () => {
   console.log('GPU process crashed! Need to restart?');
+  electron.dialog.showErrorBox('GPU has crashed', 'You need to restart!');
 });
 
 // This method will be called when Electron has finished
