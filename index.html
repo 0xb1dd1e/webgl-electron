@@ -1,38 +1,84 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <title>Hello World!</title>
-  </head>
-  <body>
-    <canvas id="glCanvas" width="640" height="480">Your browser doesn't appear to support the <code>&lt;canvas&gt;</code> element.</canvas>
-    <script id="shader-fs" type="x-shader/x-fragment">
-      void main(void) {
-        gl_FragColor = vec4(0.0, 1.0, 1.0, 1.0);
+
+<head>
+  <meta charset="UTF-8">
+  <title>Context Loss Test</title>
+</head>
+
+<body>
+  <canvas id="glCanvas" width="800" height="600">Your browser doesn't appear to support the
+    <code>&lt;canvas&gt;</code> element.</canvas>
+  <script id="shader-fs" type="x-shader/x-fragment">
+    void main(void) { gl_FragColor = vec4(0.0, 0.5, 1.0, 1.0); }
+  </script>
+  <script id="shader-vs" type="x-shader/x-vertex">
+    attribute vec3 aVertexPosition; uniform mat4 uMVMatrix; uniform mat4 uPMatrix; void main(void) { gl_Position = uPMatrix *
+    uMVMatrix * vec4(aVertexPosition, 1.0); }
+  </script>
+  <script>
+    var canvas = document.getElementById('glCanvas');
+
+    canvas.addEventListener('webglcontextcreationerror', e => {
+      console.log(`webglcontextcreationerror: ${e.statusMessage}`);
+    }, false);
+
+    var vertexShader = document.getElementById('shader-vs');
+    var fragmentShader = document.getElementById('shader-fs');
+
+    const Renderer = require('./renderer.js');
+    var renderer = new Renderer({
+      'canvasElement': canvas,
+      'vertexShader': vertexShader.text,
+      'fragmentShader': fragmentShader.text,
+    });
+
+    const gl = renderer.gl();
+    const contextLoser = gl.getExtension('WEBGL_lose_context');
+
+    canvas.addEventListener('webglcontextlost', e => {
+      console.log('%cWebGL Context Lost!',
+        `font-weight: bold;
+         font-size: 18px;
+         color: red;`
+      );
+      renderer.loseContext();
+      e.preventDefault();
+    }, false);
+
+    canvas.addEventListener('webglcontextrestored', e => {
+      console.log('%cWebGL Context Restored!',
+        `font-weight: bold;
+         font-size: 18px;
+         color: green;`
+      );
+      renderer.restoreContext();
+      e.preventDefault();
+    }, false);
+
+
+    console.log('press ctrl-alt-meta-L to send lose/restore context');
+    window.addEventListener('keydown', e => {
+      if (e.ctrlKey && e.altKey && e.metaKey && e.shiftKey && e.keyCode === 76) {
+        if (!gl.isContextLost()) {
+          console.log('%cTriggering a loss of context', 'font-weight: italic;');
+          contextLoser.loseContext();
+        } else {
+          console.log('%cTriggering a restoration of context', 'font-weight: italic;');
+          contextLoser.restoreContext();
+        }
       }
-    </script>
-    <script id="shader-vs" type="x-shader/x-vertex">
-      attribute vec3 aVertexPosition;
+    }, false);
 
-      uniform mat4 uMVMatrix;
-      uniform mat4 uPMatrix;
+    //gl.linkProgram(program);
 
-      void main(void) {
-        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
-      }
-    </script>
-    <script>
-       var canvas = document.getElementById('glCanvas');
-       var vertexShader = document.getElementById('shader-vs');
-       var fragmentShader = document.getElementById('shader-fs');
+    //if (!gl.getProgramParameter(program, gl.LINK_STATUS) && !gl.isContextLost()) {
+    //  var info = gl.getProgramInfoLog(program);
+    //  console.log('Error linking program:\n' + info);
+    //}
 
-       const Renderer = require('./renderer.js');
-       var renderer = new Renderer({
-           'canvasElement' : canvas,
-           'vertexShader' : vertexShader.text,
-           'fragmentShader' : fragmentShader.text,
-       });
-       renderer.render();
-    </script>
-  </body>
+    renderer.render();
+  </script>
+</body>
+
 </html>

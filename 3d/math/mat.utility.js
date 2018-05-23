@@ -71,6 +71,19 @@ var MatUtility = (function(){
             [ 0.0, 0.0, 0.0, 1.0 ]
         ]);
     };
+
+    MatUtilityClass.prototype.rotateZ = function (theta)
+    {
+        var s = Math.sin(theta);
+        var c = Math.cos(theta);
+        return new Matrix4f([
+            [   c,  -s, 0.0, 0.0 ],
+            [   s,   c, 0.0, 0.0 ],
+            [ 0.0, 0.0, 1.0, 0.0 ],
+            [ 0.0, 0.0, 0.0, 1.0 ]
+        ]);
+    };
+
     /**
      * initialize identity matrix
      */
