@@ -63,9 +63,17 @@ function hookPowerMonitorEvents() {
 }
 
 app.on('gpu-process-crashed', () => {
-  console.log('GPU process crashed! Need to restart?');
-  electron.dialog.showErrorBox('GPU has crashed', 'You need to restart!');
+  console.log('GPU process crashed! Look for the webgl contexts to be restored...');
+  //electron.dialog.showErrorBox('GPU has crashed', 'You need to restart!');
 });
+
+
+const enableGPUProcessCrashHandler = true;
+
+if (enableGPUProcessCrashHandler) {
+  app.commandLine.appendSwitch('--disable-gpu-process-crash-limit');
+  app.disableDomainBlockingFor3DAPIs();
+}
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
